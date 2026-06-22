@@ -25,6 +25,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useQuotationForm } from "@/hooks/use-quotation-form";
 import {
+  buildLeadNotes,
   buildQuotationWhatsAppMessage,
   openWhatsAppWithMessage,
 } from "@/lib/whatsapp";
@@ -86,6 +87,22 @@ export function RequestQuotationModal({
     event.preventDefault();
 
     const success = await submit(async (data) => {
+      try {
+        await fetch("/api/leads", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: data.fullName,
+            phone: data.phoneNumber,
+            email: data.email || null,
+            company: data.companyName || "-",
+            notes: buildLeadNotes(data),
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to save lead:", error); // silent — jangan block WA
+      }
+
       const message = buildQuotationWhatsAppMessage(data);
       openWhatsAppWithMessage(message);
       resetForm();
@@ -114,7 +131,11 @@ export function RequestQuotationModal({
         </DialogHeader>
 
         <DialogBody>
-          <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit} noValidate>
+          <form
+            className="space-y-4 sm:space-y-5"
+            onSubmit={handleSubmit}
+            noValidate
+          >
             <div className="grid min-w-0 gap-4 md:grid-cols-2">
               <div className="min-w-0 space-y-2 md:col-span-2">
                 <Label htmlFor="fullName">
@@ -216,9 +237,7 @@ export function RequestQuotationModal({
                     id="productType"
                     aria-invalid={Boolean(showError("productType"))}
                     aria-describedby={
-                      showError("productType")
-                        ? "productType-error"
-                        : undefined
+                      showError("productType") ? "productType-error" : undefined
                     }
                     className={cn(showError("productType") && "border-error")}
                   >
@@ -333,24 +352,24 @@ export function RequestQuotationModal({
             </ul>
 
             <div className="sticky bottom-0 -mx-4 border-t border-border bg-white px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:-mx-6 sm:px-6">
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full bg-[#25D366] text-white hover:bg-[#1ebe57]"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  Opening WhatsApp...
-                </>
-              ) : (
-                <>
-                  <MessageCircle className="h-4 w-4" aria-hidden />
-                  Send via WhatsApp
-                </>
-              )}
-            </Button>
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full bg-[#25D366] text-white hover:bg-[#1ebe57]"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    Opening WhatsApp...
+                  </>
+                ) : (
+                  <>
+                    <MessageCircle className="h-4 w-4" aria-hidden />
+                    Send via WhatsApp
+                  </>
+                )}
+              </Button>
             </div>
           </form>
         </DialogBody>

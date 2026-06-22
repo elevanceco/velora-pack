@@ -1,0 +1,6 @@
+test:
+    ☐ rtest 1
+    ☐ test 2
+    subbtest:  
+        ✔ test s@started(26-06-08 17:57) @done(26-06-08 17:58) @lasted(1m51s)
+Archive:
