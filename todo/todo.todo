@@ -1,0 +1,39 @@
+Request quotation:
+    ☐ Request quotation product type menggunakan data produk dari database.
+    ☐ Dropdown menampilkan nama produk yang sudah terdaftar.
+    ☐ Simpan productId saat customer submit quotation, bukan hanya nama produk.
+    ☐ Jika produk dipilih dari halaman detail produk, preselect product tersebut di quotation form.
+    ☐ Tambahkan opsi Other / Custom Packaging Requirement.
+
+User Login: 
+    ✔ login pake email dan password yang udah di daftarin @done(26-07-08 07:36)
+    ✔ kalo belum punya akun, bisa daftar dulu @done(26-07-08 07:36)
+    redirect setelah login per role:
+        ☐ role customer -> redirect ke halaman quotation
+        ☐ role admin -> redirect ke halaman dashboard admin
+    auth:
+        ☐ role customer default
+        ☐ untuk role admin, bisa diatur di database
+    navbar:
+        ☐ kalo belum login, navbar ada tombol login dan register
+        ☐ kalo udah login, navbar ada tombol logout dan profile
+        ☐ kalo role admin, navbar ada tombol dashboard admin
+
+Quotation:
+    ☐ form quotation di update 
+    ☐ optional form -> company Industry, company address, company phone number, company email
+    ☐ autofill form quotation setelah login 
+
+crucial points:
+    ☐ Customer registration membuat User + CustomerProfile dalam satu Prisma transaction.
+    ☐ Password di-hash pakai bcryptjs.
+    ☐ Email dinormalisasi lowercase dan dicek unik.
+    ☐ Referral code optional, valid referral auto-assign customer ke SALES.
+    ☐ Customer tanpa referral masuk sebagai unassigned customer.
+    ☐ Customer tidak bisa akses /admin.
+    ☐ SALES hanya bisa lihat lead/customer yang assigned ke dirinya.
+    ☐ Lead tersimpan dulu ke database sebelum direct WhatsApp.
+    ☐ Jika WhatsApp popup diblokir, tampilkan tombol fallback "Open WhatsApp".
+    ☐ Tambahkan halaman /account untuk update profile customer.
+    ☐ Tambahkan /account/quotations untuk history quotation nanti.
+

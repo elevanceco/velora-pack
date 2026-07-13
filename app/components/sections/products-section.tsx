@@ -1,47 +1,52 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLink } from "../arrow-link";
 import { SectionTag } from "../section-tag";
-import Image from "next/image";
+import { QuotationLink } from "../quotation-trigger";
 
-const products = [
-  {
-    title: "OPP Polybag",
-    description:
-      "Crystal-clear bags for apparel, textiles, and retail packaging with reliable seal strength.",
-    tone: "from-sky-100 to-blue-50",
-    productImage: "/images/product-opp-polybag.png",
-  },
-  {
-    title: "Printed OPP",
-    description:
-      "Custom logo and brand printing for professional product presentation at scale.",
-    tone: "from-indigo-100 to-violet-50",
-    productImage: "/images/product-batik.png",
-  },
-  {
-    title: "OPP Roll Film",
-    description:
-      "High-clarity roll stock for automatic packing lines and garment factories.",
-    tone: "from-cyan-100 to-teal-50",
-    productImage: "/images/product-opp-rollfilm.png",
-  },
-  {
-    title: "Perforated Bags",
-    description:
-      "Easy-tear perforation for efficient packing workflows and consumer convenience.",
-    tone: "from-blue-100 to-slate-50",
-    productImage: "/images/product-perforated-bags.png",
-  },
-  {
-    title: "Custom Sizes",
-    description:
-      "Tailored dimensions and thickness to match your product specs and machinery.",
-    tone: "from-[#B8D9FF] to-sky-50",
-    productImage: "/images/product-frosted2.png",
-  },
+const TONE_PALETTE = [
+  "from-sky-100 to-blue-50",
+  "from-indigo-100 to-violet-50",
+  "from-cyan-100 to-teal-50",
+  "from-blue-100 to-slate-50",
+  "from-[#B8D9FF] to-sky-50",
 ] as const;
 
-export function ProductsSection() {
+type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  description: string | null;
+  thickness: string | null;
+  sizeRange: string | null;
+  moq: number;
+  uom: string | null;
+  imageUrl: string | null;
+};
+
+async function getProducts(): Promise<Product[]> {
+  try {
+    const res = await fetch(
+      `${process.env.DASHBOARD_URL}/api/public/products`,
+      {
+        next: { revalidate: 300 },
+      },
+    );
+    if (!res.ok) return [];
+    const { products } = await res.json();
+    return products;
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+    return [];
+  }
+}
+
+export async function ProductsSection() {
+  const products = await getProducts();
+
+  if (products.length === 0) return null; // dashboard down/kosong -> section gak nongol, gak crash
+
   return (
     <section id="products" className="py-12 sm:py-16 lg:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -57,29 +62,23 @@ export function ProductsSection() {
           </ArrowLink>
         </div>
 
-        {/* Mobile / tablet: horizontal scroll */}
         <div className="mt-8 -mx-4 flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory scrollbar-none md:mx-0 md:hidden md:px-0">
-          {products.map(({ title, description, tone, productImage }) => (
+          {products.map((product, index) => (
             <ProductCard
-              key={title}
-              title={title}
-              description={description}
-              tone={tone}
+              key={product.id}
+              product={product}
+              tone={TONE_PALETTE[index % TONE_PALETTE.length]}
               className="w-[min(280px,85vw)] shrink-0 snap-start"
-              productImage={productImage}
             />
           ))}
         </div>
 
-        {/* Desktop: grid */}
-        <div className="mt-8 hidden gap-5 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {products.map(({ title, description, tone, productImage }) => (
+        <div className="mt-10 hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3">
+          {products.map((product, index) => (
             <ProductCard
-              key={title}
-              title={title}
-              description={description}
-              tone={tone}
-              productImage={productImage}
+              key={product.id}
+              product={product}
+              tone={TONE_PALETTE[index % TONE_PALETTE.length]}
             />
           ))}
         </div>
@@ -89,49 +88,103 @@ export function ProductsSection() {
 }
 
 function ProductCard({
-  title,
-  description,
-  tone,
+  product,
   className = "",
-  productImage,
 }: {
-  title: string;
-  description: string;
-  tone: string;
+  product: Product;
+  tone?: string;
   className?: string;
-  productImage?: string;
 }) {
+  const specs = [product.thickness, product.sizeRange].filter(Boolean);
+
   return (
     <article
-      className={`group flex flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-all hover:shadow-lg ${className}`}
+      className={`
+        group
+        flex
+        flex-col
+        overflow-hidden
+        rounded-2xl
+        border
+        border-border
+        bg-white
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:shadow-xl
+        ${className}
+      `}
     >
-      <div className="relative aspect-[4/5] max-h-48 overflow-hidden sm:max-h-none">
-        {productImage ? (
+      {/* Image */}
+
+      <div className="relative aspect-[4/3] overflow-hidden bg-background">
+        {product.imageUrl ? (
           <Image
-            src={productImage}
-            alt={title}
+            src={product.imageUrl}
+            alt={product.name}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className={`h-full w-full bg-gradient-to-br ${tone}`} />
+          <div className="h-full w-full bg-film-blue/30" />
         )}
       </div>
 
-      <div className="relative flex flex-1 flex-col p-4">
-        <h3 className="font-bold text-velora-navy">{title}</h3>
+      {/* Content */}
 
-        <p className="mt-2 flex-1 text-sm leading-relaxed text-text/60 line-clamp-3">
-          {description}
+      <div className="flex flex-1 flex-col p-5">
+        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-velora-blue">
+          {product.category}
+        </span>
+
+        <h3 className="mt-2 text-lg font-semibold leading-snug text-velora-navy">
+          {product.name}
+        </h3>
+
+        <p className="mt-3 flex-1 text-sm leading-6 text-text/70">
+          {product.description ||
+            "Contact us for detailed specifications and quotation."}
         </p>
 
-        <Link
+        {/* Specs */}
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {specs.map((spec) => (
+            <span
+              key={spec}
+              className="rounded-full bg-background px-3 py-1 text-xs font-medium text-text/70"
+            >
+              {spec}
+            </span>
+          ))}
+
+          <span className="rounded-full bg-film-blue/30 px-3 py-1 text-xs font-medium text-velora-navy">
+            MOQ {product.moq.toLocaleString("id-ID")}
+            {product.uom ? ` ${product.uom}` : ""}
+          </span>
+        </div>
+
+        {/* CTA */}
+
+        <QuotationLink
           href="#quotation"
-          className="mt-4 inline-flex h-8 w-8 items-center justify-center self-end rounded-full border border-border text-velora-blue transition-colors group-hover:border-velora-blue group-hover:bg-film-blue/40"
-          aria-label={`Learn more about ${title}`}
+          className="
+            mt-5
+            inline-flex
+            items-center
+            gap-2
+            text-sm
+            font-medium
+            text-velora-blue
+            transition-colors
+            hover:text-velora-navy
+          "
         >
-          <span aria-hidden>→</span>
-        </Link>
+          Request Quote
+          <span className="transition-transform group-hover:translate-x-1">
+            →
+          </span>
+        </QuotationLink>
       </div>
     </article>
   );

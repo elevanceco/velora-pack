@@ -47,3 +47,17 @@ export function openWhatsAppWithMessage(message: string): void {
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
   window.open(url, "_blank", "noopener,noreferrer");
 }
+
+export function buildLeadNotes(data: QuotationFormData): string {
+  const customPrinting =
+    data.customPrinting === "yes"
+      ? "Yes"
+      : data.customPrinting === "no"
+        ? "No"
+        : "-";
+
+  return `Product: ${getProductLabel(data.productType)}
+Estimated Quantity: ${data.estimatedQuantity}
+Custom Printing: ${customPrinting}
+Notes: ${data.additionalNotes || "-"}`;
+}
