@@ -185,7 +185,7 @@ export function Navbar() {
                             onClick={() => setAccountOpen(false)}
                           >
                             <LayoutDashboard size={16} />
-                            Open dashboard
+                            Open internal dashboard
                           </a>
                         ) : (
                           <div className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-text/50">
