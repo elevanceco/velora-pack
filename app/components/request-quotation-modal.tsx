@@ -30,14 +30,9 @@ import {
   openWhatsAppWithMessage,
 } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
-
-const PRODUCT_OPTIONS = [
-  { value: "opp-plastic-bag", label: "OPP Plastic Bag" },
-  { value: "printed-opp", label: "Printed OPP Packaging" },
-  { value: "garment-packaging", label: "Garment Packaging" },
-  { value: "food-packaging", label: "Food Packaging" },
-  { value: "other", label: "Other" },
-] as const;
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useQuotationModal } from "./quotation-modal-provider"; // untuk get selectedProductId dari context
 
 const TRUST_INDICATORS = [
   "Response within 24 hours",
@@ -76,6 +71,96 @@ export function RequestQuotationModal({
     submit,
   } = useQuotationForm();
 
+  const { data: session, status } = useSession();
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const { selectedProductId } = useQuotationModal();
+
+  // use effect to prefill the productId field if selectedProductId is available
+  useEffect(() => {
+    if (!open) return;
+
+    if (!selectedProductId) return;
+
+    setField("productId", selectedProductId);
+  }, [open, selectedProductId, setField]);
+
+  // use effect to fetch product options from backend
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const res = await fetch("/api/products");
+
+        if (!res.ok) return;
+
+        const result = await res.json();
+
+        setProducts(result.products);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadProducts();
+  }, []);
+  // use effect to prefill the form with user data if logged in
+  useEffect(() => {
+    if (!open) return;
+    if (status !== "authenticated") return;
+    if (!session?.user?.accessToken) return;
+    if (!backendUrl) return;
+
+    let cancelled = false;
+
+    async function loadCustomerProfile() {
+      try {
+        const response = await fetch(
+          `${backendUrl}/api/public/customer-profile`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${session?.user.accessToken}`,
+            },
+            cache: "no-store",
+          },
+        );
+
+        if (!response.ok || cancelled) {
+          return;
+        }
+
+        const result = await response.json();
+
+        if (!result.success || !result.data || cancelled) {
+          return;
+        }
+
+        const customer = result.data;
+        const profile = customer.profile;
+
+        setField("fullName", customer.name ?? "");
+        setField("email", customer.email ?? "");
+
+        if (profile?.companyName) {
+          setField("companyName", profile.companyName);
+        }
+
+        if (profile?.phone) {
+          setField("phoneNumber", profile.phone);
+        }
+      } catch (error) {
+        console.error("Failed to autofill customer profile:", error);
+      }
+    }
+
+    void loadCustomerProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, status, session?.user?.accessToken, backendUrl, setField]);
+
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       resetForm();
@@ -90,21 +175,31 @@ export function RequestQuotationModal({
       try {
         await fetch("/api/leads", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify({
             name: data.fullName,
             phone: data.phoneNumber,
             email: data.email || null,
             company: data.companyName || "-",
-            notes: buildLeadNotes(data),
+
+            productId: data.productId || null,
+            estimatedQty: data.estimatedQty || null,
+            customPrinting: data.customPrinting,
+            notes: data.notes || null,
+
+            customerId: session?.user?.id ?? null,
           }),
         });
       } catch (error) {
-        console.error("Failed to save lead:", error); // silent — jangan block WA
+        console.error("Failed to save lead:", error);
       }
 
       const message = buildQuotationWhatsAppMessage(data);
+
       openWhatsAppWithMessage(message);
+
       resetForm();
       onOpenChange(false);
     });
@@ -223,64 +318,60 @@ export function RequestQuotationModal({
               </div>
 
               <div className="min-w-0 space-y-2 md:col-span-2">
-                <Label htmlFor="productType">
+                <Label htmlFor="productId">
                   Product Type <span className="text-error">*</span>
                 </Label>
                 <Select
-                  value={formData.productType || undefined}
+                  value={formData.productId || undefined}
                   onValueChange={(value) => {
-                    setField("productType", value);
-                    setFieldTouched("productType");
+                    setField("productId", value);
+                    setFieldTouched("productId");
                   }}
                 >
                   <SelectTrigger
-                    id="productType"
-                    aria-invalid={Boolean(showError("productType"))}
+                    id="productId"
+                    aria-invalid={Boolean(showError("productId"))}
                     aria-describedby={
-                      showError("productType") ? "productType-error" : undefined
+                      showError("productId") ? "productId-error" : undefined
                     }
-                    className={cn(showError("productType") && "border-error")}
+                    className={cn(showError("productId") && "border-error")}
                   >
                     <SelectValue placeholder="Select product type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {PRODUCT_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
+                    {products.map((product) => (
+                      <SelectItem key={product.id} value={product.id}>
+                        {product.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                <div id="productType-error">
-                  <FieldError message={showError("productType")} />
+                <div id="productId-error">
+                  <FieldError message={showError("productId")} />
                 </div>
               </div>
 
               <div className="min-w-0 space-y-2 md:col-span-2">
-                <Label htmlFor="estimatedQuantity">
+                <Label htmlFor="estimatedQty">
                   Estimated Quantity <span className="text-error">*</span>
                 </Label>
                 <Input
-                  id="estimatedQuantity"
-                  name="estimatedQuantity"
+                  id="estimatedQty"
+                  name="estimatedQty"
                   placeholder="e.g. 10,000 pcs / month"
-                  value={formData.estimatedQuantity}
+                  value={formData.estimatedQty}
                   onChange={(event) =>
-                    setField("estimatedQuantity", event.target.value)
+                    setField("estimatedQty", event.target.value)
                   }
-                  onBlur={() => setFieldTouched("estimatedQuantity")}
-                  aria-invalid={Boolean(showError("estimatedQuantity"))}
+                  onBlur={() => setFieldTouched("estimatedQty")}
+                  aria-invalid={Boolean(showError("estimatedQty"))}
                   aria-describedby={
-                    showError("estimatedQuantity")
-                      ? "estimatedQuantity-error"
-                      : undefined
+                    showError("estimatedQty") ? "estimatedQty-error" : undefined
                   }
-                  className={cn(
-                    showError("estimatedQuantity") && "border-error",
-                  )}
+                  className={cn(showError("estimatedQty") && "border-error")}
                 />
-                <div id="estimatedQuantity-error">
-                  <FieldError message={showError("estimatedQuantity")} />
+                <div id="estimatedQty-error">
+                  <FieldError message={showError("estimatedQty")} />
                 </div>
               </div>
 
@@ -289,9 +380,15 @@ export function RequestQuotationModal({
                   Custom Printing
                 </legend>
                 <RadioGroup
-                  value={formData.customPrinting}
+                  value={
+                    formData.customPrinting === null
+                      ? ""
+                      : formData.customPrinting
+                        ? "yes"
+                        : "no"
+                  }
                   onValueChange={(value) =>
-                    setField("customPrinting", value as "yes" | "no")
+                    setField("customPrinting", value === "yes")
                   }
                   className="flex gap-6"
                 >
@@ -317,15 +414,13 @@ export function RequestQuotationModal({
               </fieldset>
 
               <div className="min-w-0 space-y-2 md:col-span-2">
-                <Label htmlFor="additionalNotes">Additional Notes</Label>
+                <Label htmlFor="notes">Additional Notes</Label>
                 <Textarea
-                  id="additionalNotes"
-                  name="additionalNotes"
+                  id="notes"
+                  name="notes"
                   placeholder="Size, thickness, printing details, delivery location, etc."
-                  value={formData.additionalNotes}
-                  onChange={(event) =>
-                    setField("additionalNotes", event.target.value)
-                  }
+                  value={formData.notes}
+                  onChange={(event) => setField("notes", event.target.value)}
                   rows={4}
                 />
               </div>

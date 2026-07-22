@@ -7,10 +7,14 @@ export type QuotationFormData = {
   companyName: string;
   phoneNumber: string;
   email: string;
-  productType: string;
-  estimatedQuantity: string;
-  customPrinting: "yes" | "no" | "";
-  additionalNotes: string;
+
+  productId: string;
+
+  estimatedQty: string;
+
+  customPrinting: boolean | null;
+
+  notes: string;
 };
 
 export type QuotationFormField = keyof QuotationFormData;
@@ -22,10 +26,14 @@ export const INITIAL_QUOTATION_FORM: QuotationFormData = {
   companyName: "",
   phoneNumber: "",
   email: "",
-  productType: "",
-  estimatedQuantity: "",
-  customPrinting: "",
-  additionalNotes: "",
+
+  productId: "",
+
+  estimatedQty: "",
+
+  customPrinting: null,
+
+  notes: "",
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -45,20 +53,25 @@ function validateForm(data: QuotationFormData): QuotationFormErrors {
     errors.email = "Enter a valid email address.";
   }
 
-  if (!data.productType) {
-    errors.productType = "Please select a product type.";
+  if (!data.productId) {
+    errors.productId = "Please select a product.";
   }
 
-  if (!data.estimatedQuantity.trim()) {
-    errors.estimatedQuantity = "Estimated quantity is required.";
+  if (!data.estimatedQty.trim()) {
+    errors.estimatedQty = "Estimated quantity is required.";
+  }
+
+  if (data.customPrinting === null) {
+    errors.customPrinting = "Please select one.";
   }
 
   return errors;
 }
 
 export function useQuotationForm() {
-  const [formData, setFormData] =
-    useState<QuotationFormData>(INITIAL_QUOTATION_FORM);
+  const [formData, setFormData] = useState<QuotationFormData>(
+    INITIAL_QUOTATION_FORM,
+  );
   const [errors, setErrors] = useState<QuotationFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState<
@@ -101,8 +114,9 @@ export function useQuotationForm() {
         fullName: true,
         phoneNumber: true,
         email: true,
-        productType: true,
-        estimatedQuantity: true,
+        productId: true,
+        estimatedQty: true,
+        customPrinting: true,
       });
 
       if (!validate()) {

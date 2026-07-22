@@ -36,9 +36,12 @@ export function QuotationTrigger({
   );
 }
 
-type QuotationLinkProps = ComponentPropsWithoutRef<"a">;
+type QuotationLinkProps = ComponentPropsWithoutRef<"a"> & {
+  productId?: string;
+};
 
 export function QuotationLink({
+  productId,
   className,
   onClick,
   children,
@@ -55,7 +58,7 @@ export function QuotationLink({
         onClick?.(event);
         if (!event.defaultPrevented) {
           event.preventDefault();
-          openModal();
+          openModal(productId);
         }
       }}
       {...props}

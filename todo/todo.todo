@@ -1,36 +1,44 @@
+AI Rules for agent :
+    ✔ make rules for agents.md @done(26-07-15 07:19)
+    ☐ create rules for agent to follow when interacting with customers, including how to handle requests, how to escalate issues, and how to maintain professionalism.
+    ☐ create prd.md
+    ☐ create plan.md
+    ☐ create documentation for AI (architecture, roadmap).md
+
 Request quotation:
-    ☐ Request quotation product type menggunakan data produk dari database.
-    ☐ Dropdown menampilkan nama produk yang sudah terdaftar.
-    ☐ Simpan productId saat customer submit quotation, bukan hanya nama produk.
-    ☐ Jika produk dipilih dari halaman detail produk, preselect product tersebut di quotation form.
-    ☐ Tambahkan opsi Other / Custom Packaging Requirement.
+    ✔ Request quotation product type menggunakan data produk dari database. @done(26-07-11 09:19)
+    ✔ Dropdown menampilkan nama produk yang sudah terdaftar. @done(26-07-11 09:19)
+    ✔ Simpan productId saat customer submit quotation, bukan hanya nama produk. @done(26-07-11 09:19)
+    ✔ Jika produk dipilih dari halaman detail produk, preselect product tersebut di quotation form. @done(26-07-11 11:31)
 
 User Login: 
     ✔ login pake email dan password yang udah di daftarin @done(26-07-08 07:36)
     ✔ kalo belum punya akun, bisa daftar dulu @done(26-07-08 07:36)
     redirect setelah login per role:
-        ☐ role customer -> redirect ke halaman quotation
-        ☐ role admin -> redirect ke halaman dashboard admin
+        ✔ role customer -> redirect ke halaman dashboard landing page @done(26-07-09 21:55)
+        ✔ role admin -> redirect ke halaman dashboard admin @done(26-07-09 21:55)
     auth:
-        ☐ role customer default
+        ✔ role customer default @done(26-07-09 21:55)
         ☐ untuk role admin, bisa diatur di database
     navbar:
-        ☐ kalo belum login, navbar ada tombol login dan register
-        ☐ kalo udah login, navbar ada tombol logout dan profile
-        ☐ kalo role admin, navbar ada tombol dashboard admin
+        ✔ kalo belum login, navbar ada tombol login dan register @done(26-07-09 21:55)
+        ✔ kalo udah login, navbar ada tombol logout dan profile @done(26-07-09 21:55)
+        ✔ kalo role admin, navbar ada tombol dashboard admin @done(26-07-09 21:55)
+    ☐ auth blom konek antara backend dan frontend, jadi sementara hrs login 2 kali karna dianggep beda user 
+    
 
 Quotation:
-    ☐ form quotation di update 
-    ☐ optional form -> company Industry, company address, company phone number, company email
-    ☐ autofill form quotation setelah login 
+    ✔ form quotation di update @done(26-07-13 21:04)
+    ✔ optional form -> company Industry, company address, company phone number, company email @done(26-07-13 21:04)
+    ✔ autofill form quotation setelah login @done(26-07-13 21:04)
 
 crucial points:
-    ☐ Customer registration membuat User + CustomerProfile dalam satu Prisma transaction.
-    ☐ Password di-hash pakai bcryptjs.
-    ☐ Email dinormalisasi lowercase dan dicek unik.
-    ☐ Referral code optional, valid referral auto-assign customer ke SALES.
-    ☐ Customer tanpa referral masuk sebagai unassigned customer.
-    ☐ Customer tidak bisa akses /admin.
+    ✔ Customer registration membuat User + CustomerProfile dalam satu Prisma transaction. @done(26-07-13 21:04)
+    ✔ Password di-hash pakai bcryptjs. @done(26-07-13 21:04)
+    ✔ Email dinormalisasi lowercase dan dicek unik. @done(26-07-13 21:04)
+    ✔ Referral code optional, valid referral auto-assign customer ke SALES. @done(26-07-13 21:04)
+    ✔ Customer tanpa referral masuk sebagai unassigned customer. @done(26-07-13 21:04)
+    ✔ Customer tidak bisa akses /admin. @done(26-07-13 21:04)
     ☐ SALES hanya bisa lihat lead/customer yang assigned ke dirinya.
     ☐ Lead tersimpan dulu ke database sebelum direct WhatsApp.
     ☐ Jika WhatsApp popup diblokir, tampilkan tombol fallback "Open WhatsApp".

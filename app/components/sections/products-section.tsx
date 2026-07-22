@@ -28,7 +28,7 @@ type Product = {
 async function getProducts(): Promise<Product[]> {
   try {
     const res = await fetch(
-      `${process.env.DASHBOARD_URL}/api/public/products`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/public/products`,
       {
         next: { revalidate: 300 },
       },
@@ -126,7 +126,9 @@ function ProductCard({
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="h-full w-full bg-film-blue/30" />
+          <div className="flex h-full items-center justify-center bg-film-blue/20">
+            <span className="text-sm text-text/50">No Image</span>
+          </div>
         )}
       </div>
 
@@ -168,6 +170,7 @@ function ProductCard({
 
         <QuotationLink
           href="#quotation"
+          productId={product.id}
           className="
             mt-5
             inline-flex

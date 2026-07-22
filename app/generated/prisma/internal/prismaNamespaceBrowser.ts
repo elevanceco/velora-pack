@@ -51,7 +51,14 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  Lead: 'Lead'
+  User: 'User',
+  CustomerProfile: 'CustomerProfile',
+  SalesProfile: 'SalesProfile',
+  Product: 'Product',
+  Prospect: 'Prospect',
+  Lead: 'Lead',
+  WebsiteSetting: 'WebsiteSetting',
+  Blog: 'Blog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -70,19 +77,133 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  password: 'password',
+  role: 'role',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  assignedSalesId: 'assignedSalesId'
+} as const
+
+export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const CustomerProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  companyName: 'companyName',
+  phone: 'phone',
+  industry: 'industry',
+  address: 'address',
+  companyEmail: 'companyEmail',
+  website: 'website',
+  jobTitle: 'jobTitle',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomerProfileScalarFieldEnum = (typeof CustomerProfileScalarFieldEnum)[keyof typeof CustomerProfileScalarFieldEnum]
+
+
+export const SalesProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  referralCode: 'referralCode'
+} as const
+
+export type SalesProfileScalarFieldEnum = (typeof SalesProfileScalarFieldEnum)[keyof typeof SalesProfileScalarFieldEnum]
+
+
+export const ProductScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  category: 'category',
+  description: 'description',
+  thickness: 'thickness',
+  sizeRange: 'sizeRange',
+  moq: 'moq',
+  uom: 'uom',
+  imageUrl: 'imageUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const ProspectScalarFieldEnum = {
+  id: 'id',
+  companyName: 'companyName',
+  picName: 'picName',
+  picTitle: 'picTitle',
+  phone: 'phone',
+  industry: 'industry',
+  potentialVolume: 'potentialVolume',
+  checklistJson: 'checklistJson',
+  salesId: 'salesId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProspectScalarFieldEnum = (typeof ProspectScalarFieldEnum)[keyof typeof ProspectScalarFieldEnum]
+
+
 export const LeadScalarFieldEnum = {
   id: 'id',
   name: 'name',
   phone: 'phone',
   email: 'email',
   company: 'company',
+  productId: 'productId',
+  estimatedQty: 'estimatedQty',
+  customPrinting: 'customPrinting',
   notes: 'notes',
   status: 'status',
+  customerId: 'customerId',
+  salesId: 'salesId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type LeadScalarFieldEnum = (typeof LeadScalarFieldEnum)[keyof typeof LeadScalarFieldEnum]
+
+
+export const WebsiteSettingScalarFieldEnum = {
+  id: 'id',
+  companyName: 'companyName',
+  address: 'address',
+  mapsEmbedUrl: 'mapsEmbedUrl',
+  email: 'email',
+  mainWhatsApp: 'mainWhatsApp',
+  capacityMetrics: 'capacityMetrics',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WebsiteSettingScalarFieldEnum = (typeof WebsiteSettingScalarFieldEnum)[keyof typeof WebsiteSettingScalarFieldEnum]
+
+
+export const BlogScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  excerpt: 'excerpt',
+  metaDescription: 'metaDescription',
+  content: 'content',
+  coverImage: 'coverImage',
+  author: 'author',
+  readingTime: 'readingTime',
+  tags: 'tags',
+  published: 'published',
+  publishedAt: 'publishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BlogScalarFieldEnum = (typeof BlogScalarFieldEnum)[keyof typeof BlogScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -91,6 +212,14 @@ export const SortOrder = {
 } as const
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {
@@ -107,4 +236,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

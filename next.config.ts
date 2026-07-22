@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "*.ufs.sh",
+        // hostname: "*.ufs.sh",
+        hostname: "**",
       },
     ],
   },

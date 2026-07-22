@@ -14,18 +14,33 @@ import { RequestQuotationModal } from "./request-quotation-modal";
 
 type QuotationModalContextValue = {
   open: boolean;
-  openModal: () => void;
+
+  selectedProductId: string | null;
+
+  openModal: (productId?: string) => void;
+
   closeModal: () => void;
 };
 
-const QuotationModalContext =
-  createContext<QuotationModalContextValue | null>(null);
+const QuotationModalContext = createContext<QuotationModalContextValue | null>(
+  null,
+);
 
 export function QuotationModalProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
-  const openModal = useCallback(() => setOpen(true), []);
-  const closeModal = useCallback(() => setOpen(false), []);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    null,
+  );
+
+  const openModal = useCallback((productId?: string) => {
+    setSelectedProductId(productId ?? null);
+    setOpen(true);
+  }, []);
+  const closeModal = useCallback(() => {
+    setSelectedProductId(null);
+    setOpen(false);
+  }, []);
 
   useEffect(() => {
     const handleHashOpen = () => {
@@ -48,10 +63,14 @@ export function QuotationModalProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       open,
+
+      selectedProductId,
+
       openModal,
+
       closeModal,
     }),
-    [open, openModal, closeModal],
+    [open, selectedProductId, openModal, closeModal],
   );
 
   return (

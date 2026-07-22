@@ -1,42 +1,62 @@
-import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-// export async function POST(request: Request) {
-//   const body = await request.json();
-//   const { name, phone, email, company, notes } = body;
-
-//   if (!name?.trim() || !phone?.trim() || !company?.trim()) {
-//     return NextResponse.json(
-//       { error: "name, phone, and company are required." },
-//       { status: 400 },
-//     );
-//   }
-
-//   try {
-//     const lead = await prisma.lead.create({
-//       data: { name, phone, email: email || null, company, notes },
-//     });
-//     return NextResponse.json({ lead }, { status: 201 });
-//   } catch (error) {
-//     console.error("Failed to create lead:", error);
-//     return NextResponse.json(
-//       { error: "Failed to save lead." },
-//       { status: 500 },
-//     );
-//   }
-// }
-
-// opsi 2 -> fetch api yang ada di backend (internal dashboard api) -> ini lebih aman karena kita bisa pake x-api-key
+// app/api/public/leads/route.ts
 export async function POST(request: Request) {
-  const body = await request.json();
-  const res = await fetch(`${process.env.DASHBOARD_URL}/api/public/leads`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": process.env.LEADS_API_KEY!,
-    },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+  const apiKey = request.headers.get("x-api-key");
+
+  if (apiKey !== process.env.LEADS_API_KEY) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const {
+      name,
+      phone,
+      email,
+      company,
+      productId,
+      estimatedQty,
+      customPrinting,
+      notes,
+      customerId,
+    } = await request.json();
+
+    if (!name || !phone || !company) {
+      return NextResponse.json(
+        { error: "Name, phone and company are required." },
+        { status: 400 },
+      );
+    }
+
+    const lead = await prisma.lead.create({
+      data: {
+        name,
+        phone,
+        email: email || null,
+        company,
+
+        productId: productId || null,
+        estimatedQty: estimatedQty || null,
+        customPrinting:
+          typeof customPrinting === "boolean" ? customPrinting : null,
+        notes: notes || null,
+
+        customerId: customerId || null,
+      },
+      include: {
+        product: true,
+        customer: true,
+      },
+    });
+
+    return NextResponse.json({ lead }, { status: 201 });
+  } catch (error) {
+    console.error("Create lead failed:", error);
+
+    return NextResponse.json(
+      { error: "Failed to create lead." },
+      { status: 500 },
+    );
+  }
 }

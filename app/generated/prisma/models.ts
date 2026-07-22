@@ -8,5 +8,12 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/User'
+export type * from './models/CustomerProfile'
+export type * from './models/SalesProfile'
+export type * from './models/Product'
+export type * from './models/Prospect'
 export type * from './models/Lead'
+export type * from './models/WebsiteSetting'
+export type * from './models/Blog'
 export type * from './commonInputTypes'
